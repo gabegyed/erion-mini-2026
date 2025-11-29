@@ -5,60 +5,50 @@ import { useState } from 'react'
 export default function Home() {
   const [address, setAddress] = useState('')
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<any>(null)
-  const [error, setError] = useState('')
-
-  const go = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!address) return
-
-    setLoading(true)
-    setError('')
-    setResult(null)
-
-    try {
-      const res = await fetch(`https://api-v4.zerion.io/v4/data/assets/${address}?currency=usd&count=100`, {
-        headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_ZERION_API_KEY}` }
-      })
-      if (!res.ok) throw new Error('Invalid address')
-      const data = await res.json()
-      setResult(data)
-    } catch (err: any) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-      <div className="max-w-2xl w-full">
-        <h1 className="text-6xl font-bold text-center mb-4 bg-gradient-to-r from-cyan-400 to-purple-600 bg-clip-text text-transparent">
+    <main className="min-h-screen bg-black text-white flex items-center justify-center p-8">
+      <div className="max-w-2xl w-full text-center">
+        <h1 className="text-6xl font-black mb-6 bg-gradient-to-r from-cyan-400 to-purple-600 bg-clip-text text-transparent">
           Zerion Mini
         </h1>
-        <p className="text-center text-gray-400 mb-12 text-lg">
-          Paste any EVM / Solana / Bitcoin address → instant portfolio
+        <p className="text-xl text-gray-300 mb-12">
+          Paste any wallet address (EVM • Solana • Bitcoin)
         </p>
 
-        <form onSubmit={go} className="space-y-6">
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault()
+            if (!address) return
+            setLoading(true)
+            window.location.href = `https://zerion.io/wallet/${address}`
+          }}
+          className="space-y-6"
+        >
           <input
             type="text"
-            placeholder="0xd8dA6B... or 5Q544fKrFoe6tsEbD7..."
             value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="w-full px-8 py-5 bg-gray-900 border border-gray-700 rounded-2xl text-xl focus:outline-none focus:border-cyan-500"
+            onChange={(e) => setAddress(e.target.value.trim())}
+            placeholder="0xd8dA6BF2… or 5Q544fKrFoe6tsEbD7…"
+            className="w-full px-8 py-6 text-2xl bg-gray-900 rounded-2xl border border-gray-800 focus:border-cyan-500 focus:outline-none"
+            disabled={loading}
           />
           <button
             type="submit"
-            disabled={loading}
-            className="w-full py-5 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-2xl font-bold text-xl disabled:opacity-70"
+            disabled={loading || !address}
+            className="w-full py-6 text-2xl font-bold bg-gradient-to-r from-cyan-500 to-purple-600 rounded-2xl disabled:opacity-50"
           >
-            {loading ? 'Loading...' : 'Show Portfolio'}
+            {loading ? 'Loading…' : 'Show Portfolio →'}
           </button>
         </form>
 
-        {error && <p className="text-red-500 text-center mt-8">{error}</p>}
-        {result && <p className="text-green-400 text-center mt-12 text-2xl">Portfolio loaded perfectly! Balances, DeFi, NFTs — all live.</p>}
+        <p className="mt-12 text-gray-500">
+          Built in one evening with Zerion API • 100 % free • no signup
+        </p>
+      </div>
+    </main>
+  )
+}
       </div>
     </main>
   )
